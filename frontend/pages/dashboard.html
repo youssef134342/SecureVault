@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SecureVault — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream-50:   #fdfcf7;
+      --cream-100:  #f9f6ed;
+      --cream-200:  #f2ece0;
+      --cream-300:  #e8ddc8;
+      --cream-400:  #d4c5a3;
+
+      --gold-300:   #d4a853;
+      --gold-400:   #c49a3c;
+      --gold-500:   #b08828;
+      --gold-600:   #8a6a1a;
+      --gold-700:   #6b5114;
+
+      --ink-900:    #1a1610;
+      --ink-700:    #2e2818;
+      --ink-500:    #5a5040;
+      --ink-400:    #7a6e5c;
+      --ink-300:    #a09282;
+      --ink-200:    #c4b9a8;
+
+      --green:      #2a7a4b;
+      --green-bg:   #edf6f1;
+      --red:        #8b2020;
+      --red-bg:     #fdf0f0;
+      --amber:      #7a5a10;
+      --amber-bg:   #fdf5e0;
+
+      --sidebar-w:  256px;
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body:    'DM Sans', sans-serif;
+      --font-mono:    'DM Mono', monospace;
+
+      --radius-sm:  4px;
+      --radius-md:  8px;
+      --radius-lg:  12px;
+      --shadow-sm:  0 1px 3px rgba(26,22,16,0.08);
+      --shadow-md:  0 4px 16px rgba(26,22,16,0.1);
+      --shadow-lg:  0 12px 40px rgba(26,22,16,0.14);
+      --border:     1px solid var(--cream-300);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--cream-100);
+      color: var(--ink-900);
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.6;
+      overflow: hidden;
+    }
+
+    /* subtle linen texture */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%23f9f6ed'/%3E%3Crect x='0' y='0' width='1' height='1' fill='%23f2ece0' opacity='0.6'/%3E%3Crect x='2' y='2' width='1' height='1' fill='%23f2ece0' opacity='0.4'/%3E%3C/svg%3E");
+      opacity: 0.7;
+    }
+
+    .app-layout {
+      position: relative; z-index: 1;
+      display: flex; height: 100vh; overflow: hidden;
+    }
+
+    /* ═══════════════════════════
+       SIDEBAR
+    ═══════════════════════════ */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-width: var(--sidebar-w);
+      background: var(--ink-900);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 10;
+      overflow: hidden;
+    }
+
+    /* thin gold line at top */
+    .sidebar::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold-600), var(--gold-300), var(--gold-600));
+    }
+
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 12px;
+      padding: 28px 22px 22px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .sidebar-logo svg {
+      width: 30px; height: 30px;
+      color: var(--gold-400);
+      flex-shrink: 0;
+    }
+
+    .logo-text { display: flex; flex-direction: column; line-height: 1.2; }
+    .logo-text .logo-main {
+      font-family: var(--font-display);
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--cream-50);
+      letter-spacing: 0.01em;
+    }
+    .logo-text .logo-sub {
+      font-size: 0.62rem; font-weight: 400;
+      color: var(--gold-400);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .sidebar-nav { flex: 1; overflow-y: auto; padding: 16px 0 8px; }
+    .sidebar-nav::-webkit-scrollbar { width: 3px; }
+    .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+    .nav-section { margin-bottom: 4px; }
+
+    .nav-label {
+      font-size: 0.6rem; font-weight: 600;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+      padding: 10px 22px 6px;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 11px;
+      width: 100%; background: transparent; border: none; cursor: pointer;
+      color: rgba(255,255,255,0.5);
+      font-family: var(--font-body); font-size: 0.83rem; font-weight: 400;
+      padding: 9px 22px;
+      text-align: left;
+      transition: all 0.15s;
+      position: relative;
+    }
+
+    .nav-item:hover {
+      color: var(--cream-100);
+      background: rgba(255,255,255,0.05);
+    }
+
+    .nav-item.active {
+      color: var(--gold-300);
+      background: rgba(196,154,60,0.1);
+      font-weight: 500;
+    }
+
+    .nav-item.active::before {
+      content: '';
+      position: absolute; left: 0; top: 4px; bottom: 4px;
+      width: 2px;
+      background: var(--gold-400);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .nav-item .icon {
+      width: 18px; height: 18px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; opacity: 0.75;
+    }
+    .nav-item.active .icon { opacity: 1; }
+    .nav-item:hover .icon  { opacity: 1; }
+
+    .nav-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.07);
+      margin: 8px 22px;
+    }
+
+    .sidebar-user {
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding: 16px 22px;
+    }
+    .sidebar-user-info {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold-600), var(--gold-300));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.78rem; font-weight: 700;
+      color: var(--ink-900); flex-shrink: 0;
+      border: 1px solid var(--gold-500);
+    }
+
+    .sidebar-username {
+      font-size: 0.83rem; font-weight: 500;
+      color: var(--cream-100);
+    }
+    .sidebar-role {
+      font-size: 0.68rem; color: rgba(255,255,255,0.35);
+      margin-top: 1px;
+    }
+
+    /* ═══════════════════════════
+       MAIN CONTENT
+    ═══════════════════════════ */
+    .main-content {
+      flex: 1; overflow-y: auto;
+      background: var(--cream-50);
+    }
+    .main-content::-webkit-scrollbar { width: 6px; }
+    .main-content::-webkit-scrollbar-thumb { background: var(--cream-300); border-radius: 3px; }
+
+    /* top rule */
+    .main-content::before {
+      content: '';
+      display: block; height: 3px;
+      background: linear-gradient(90deg, var(--gold-600), var(--gold-300), var(--gold-600));
+    }
+
+    .page-section { display: none; padding: 36px 40px; min-height: calc(100% - 3px); }
+    .page-section.active { display: block; }
+
+    /* ─── PAGE HEADER ─── */
+    .page-header {
+      display: flex; align-items: flex-start;
+      justify-content: space-between;
+      padding-bottom: 24px;
+      margin-bottom: 28px;
+      border-bottom: 1px solid var(--cream-300);
+    }
+
+    .page-title {
+      font-family: var(--font-display);
+      font-size: 1.75rem; font-weight: 600;
+      color: var(--ink-900); letter-spacing: -0.01em;
+      line-height: 1.2; margin-bottom: 4px;
+    }
+
+    .page-subtitle {
+      color: var(--ink-300); font-size: 0.8rem;
+      font-weight: 400;
+    }
+
+    /* ─── CARDS ─── */
+    .card {
+      background: #fff;
+      border: var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* gold top rule on cards */
+    .card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold-400), var(--cream-300), transparent);
+    }
+
+    .fade-in { animation: fadeUp 0.35s ease both; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── STATS ─── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: #fff;
+      border: var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 22px;
+      box-shadow: var(--shadow-sm);
+      position: relative; overflow: hidden;
+    }
+
+    /* gold corner accent */
+    .stat-card::after {
+      content: '';
+      position: absolute; top: 0; right: 0;
+      border-top: 32px solid var(--cream-200);
+      border-left: 32px solid transparent;
+    }
+
+    .stat-label {
+      font-size: 0.65rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--ink-300); margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-family: var(--font-mono);
+      font-size: 2.1rem; font-weight: 500;
+      line-height: 1; color: var(--ink-900);
+    }
+    .stat-value.accent  { color: var(--gold-600); }
+    .stat-value.green   { color: var(--green); }
+    .stat-value.purple  { color: #6b4fa0; }
+    .stat-value.yellow  { color: var(--amber); }
+
+    /* ─── SECTION LABEL ─── */
+    .section-label {
+      font-family: var(--font-display);
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--ink-700);
+      margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-label::after {
+      content: ''; flex: 1; height: 1px;
+      background: var(--cream-300);
+    }
+
+    /* ─── SECURITY INFO ─── */
+    .security-info {
+      background: var(--cream-100);
+      border: 1px solid var(--cream-300);
+      border-left: 3px solid var(--gold-400);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 0.78rem;
+      color: var(--ink-500);
+      line-height: 1.5;
+    }
+
+    /* ─── BUTTONS ─── */
+    .btn-primary {
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      width: 100%; padding: 11px 20px;
+      background: var(--ink-900);
+      color: var(--gold-300);
+      border: 1px solid var(--ink-700);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body); font-size: 0.82rem; font-weight: 500;
+      cursor: pointer; transition: all 0.15s;
+      letter-spacing: 0.02em;
+    }
+    .btn-primary:hover   { background: var(--ink-700); border-color: var(--gold-600); }
+    .btn-primary:active  { transform: scale(0.99); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-secondary {
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 9px 16px;
+      background: #fff;
+      border: var(--border);
+      color: var(--ink-500);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body); font-size: 0.8rem; font-weight: 500;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .btn-secondary:hover {
+      background: var(--cream-100);
+      border-color: var(--gold-400);
+      color: var(--ink-700);
+    }
+
+    .btn-ghost-logout {
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      width: 100%; padding: 8px 12px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.4);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body); font-size: 0.78rem;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .btn-ghost-logout:hover {
+      border-color: rgba(196,154,60,0.4);
+      color: var(--gold-300);
+    }
+
+    .btn-icon {
+      background: transparent; border: var(--border);
+      color: var(--ink-300); width: 28px; height: 28px;
+      border-radius: var(--radius-sm); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.78rem; transition: all 0.15s;
+    }
+    .btn-icon:hover { border-color: var(--red); color: var(--red); background: var(--red-bg); }
+
+    /* ─── TABLES ─── */
+    .table-wrap { overflow-x: auto; }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    thead th {
+      text-align: left; padding: 8px 12px;
+      font-size: 0.64rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--ink-300);
+      border-bottom: 2px solid var(--cream-300);
+      background: var(--cream-50);
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--cream-200);
+      transition: background 0.1s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--cream-50); }
+    tbody td { padding: 11px 12px; font-size: 0.8rem; color: var(--ink-500); }
+    .mono { font-family: var(--font-mono); }
+
+    /* ─── BADGES ─── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 9px; border-radius: 3px;
+      font-size: 0.67rem; font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+    .badge-green  { background: var(--green-bg);  color: var(--green);  border: 1px solid #b8dfca; }
+    .badge-red    { background: var(--red-bg);    color: var(--red);    border: 1px solid #f0c0c0; }
+    .badge-amber  { background: var(--amber-bg);  color: var(--amber);  border: 1px solid #e8d090; }
+    .badge-gold   { background: #fdf5e0;           color: var(--gold-600); border: 1px solid #e8c96a; }
+    .badge-ink    { background: var(--cream-200);  color: var(--ink-500); border: 1px solid var(--cream-300); }
+
+    /* ─── FORMS ─── */
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block; font-size: 0.74rem; font-weight: 600;
+      color: var(--ink-500); margin-bottom: 6px;
+      letter-spacing: 0.03em;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="file"],
+    select, textarea {
+      width: 100%; padding: 10px 13px;
+      background: var(--cream-50);
+      border: var(--border);
+      border-radius: var(--radius-md);
+      color: var(--ink-900);
+      font-family: var(--font-body); font-size: 0.83rem;
+      outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--gold-400);
+      box-shadow: 0 0 0 3px rgba(196,154,60,0.12);
+      background: #fff;
+    }
+
+    select option { background: #fff; }
+    textarea { resize: vertical; min-height: 100px; }
+
+    .input-eye { position: relative; }
+    .input-eye input { padding-right: 42px; }
+    .eye-btn {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      background: transparent; border: none; color: var(--ink-300);
+      cursor: pointer; font-size: 1rem; padding: 4px;
+    }
+    .eye-btn:hover { color: var(--ink-500); }
+
+    /* ─── UPLOAD ZONE ─── */
+    .upload-zone {
+      border: 2px dashed var(--cream-300);
+      border-radius: var(--radius-lg);
+      padding: 44px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      background: var(--cream-50);
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--gold-400);
+      background: #fdf8ee;
+    }
+    .upload-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer;
+      width: 100%; height: 100%; padding: 0; border: none; background: transparent;
+    }
+    .upload-icon { font-size: 2.8rem; margin-bottom: 14px; }
+    .upload-zone h3 { font-family: var(--font-display); font-size: 1.05rem; font-weight: 600; color: var(--ink-700); margin-bottom: 6px; }
+    .upload-zone p  { font-size: 0.75rem; color: var(--ink-300); }
+    .file-icon { font-size: 1.8rem; }
+
+    /* ─── MESSAGES ─── */
+    .error-msg {
+      background: var(--red-bg);
+      border: 1px solid #f0c0c0;
+      border-left: 3px solid var(--red);
+      color: var(--red);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 0.78rem;
+    }
+    .error-msg:empty { display: none; }
+
+    .success-msg {
+      background: var(--green-bg);
+      border: 1px solid #b8dfca;
+      border-left: 3px solid var(--green);
+      color: var(--green);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 0.78rem;
+    }
+    .success-msg:empty { display: none; }
+
+    /* ─── EMPTY STATE ─── */
+    .empty-state {
+      padding: 52px 24px;
+      text-align: center;
+      color: var(--ink-200);
+    }
+    .empty-icon { font-size: 3rem; margin-bottom: 16px; }
+    .empty-state h3 { font-family: var(--font-display); font-size: 1rem; font-weight: 600; color: var(--ink-300); margin-bottom: 6px; }
+    .empty-state p  { font-size: 0.78rem; color: var(--ink-200); }
+
+    /* ─── SPINNER ─── */
+    .spinner {
+      width: 26px; height: 26px;
+      border: 2px solid var(--cream-300);
+      border-top-color: var(--gold-400);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── PW STRENGTH ─── */
+    .pw-strength-bar {
+      height: 3px;
+      background: var(--cream-300);
+      border-radius: 2px; margin-top: 8px; overflow: hidden;
+    }
+    #pw-strength-fill {
+      height: 100%; width: 0;
+      border-radius: 2px;
+      transition: all 0.3s;
+    }
+    .pw-hint { font-size: 0.72rem; color: var(--ink-300); margin-top: 4px; }
+
+    /* ─── TOTP ─── */
+    .totp-secret-box {
+      background: var(--ink-900);
+      border: 1px solid var(--gold-600);
+      border-radius: var(--radius-md);
+      padding: 13px 16px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      letter-spacing: 0.14em;
+      color: var(--gold-300);
+      text-align: center;
+      cursor: pointer;
+      margin-bottom: 12px;
+      transition: border-color 0.15s;
+    }
+    .totp-secret-box:hover { border-color: var(--gold-300); }
+
+    /* ─── VERIFY RESULT ─── */
+    .verify-result { margin-top: 20px; }
+
+    /* ─── TOAST ─── */
+    .toast {
+      position: fixed; bottom: 28px; right: 28px; z-index: 9999;
+      background: var(--ink-900);
+      border: 1px solid var(--gold-600);
+      border-radius: var(--radius-md);
+      padding: 12px 20px;
+      font-size: 0.82rem; color: var(--cream-100);
+      transform: translateY(120%);
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      max-width: 320px;
+      box-shadow: var(--shadow-lg);
+    }
+    .toast.show { transform: translateY(0); }
+
+    /* ─── MODAL ─── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 9000;
+      background: rgba(26,22,16,0.6);
+      backdrop-filter: blur(3px);
+      display: none; align-items: center; justify-content: center;
+    }
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+      background: #fff;
+      border: var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      width: 440px; max-width: 90vw;
+      box-shadow: var(--shadow-lg);
+      animation: modalIn 0.22s ease;
+    }
+    /* gold top bar on modal */
+    .modal::before {
+      content: '';
+      display: block; height: 3px; margin: -28px -28px 20px;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      background: linear-gradient(90deg, var(--gold-600), var(--gold-300));
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.97) translateY(8px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .modal-header h3 {
+      font-family: var(--font-display);
+      font-size: 1.05rem; font-weight: 600; color: var(--ink-900);
+    }
+    .modal-close {
+      background: transparent; border: var(--border);
+      color: var(--ink-300); width: 28px; height: 28px;
+      border-radius: var(--radius-sm); cursor: pointer;
+      font-size: 0.78rem; transition: all 0.15s;
+    }
+    .modal-close:hover { border-color: var(--red); color: var(--red); background: var(--red-bg); }
+
+    /* ─── SECURITY CIRCLES ─── */
+    .sec-circle-item {
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      padding: 8px 4px;
+    }
+
+    .sec-circle {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: var(--cream-50);
+      border: 2px solid var(--gold-400);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--gold-600);
+      position: relative;
+      box-shadow: 0 0 0 6px var(--amber-bg), 0 2px 10px rgba(180,136,40,0.15);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .sec-circle:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 0 6px var(--amber-bg), 0 8px 20px rgba(180,136,40,0.2);
+    }
+
+    /* animated ring */
+    .sec-circle::before {
+      content: '';
+      position: absolute; inset: -5px;
+      border-radius: 50%;
+      border: 1px dashed rgba(196,154,60,0.35);
+      animation: rotateRing 12s linear infinite;
+    }
+
+    @keyframes rotateRing {
+      to { transform: rotate(360deg); }
+    }
+
+    .sec-circle-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem; font-weight: 500;
+      color: var(--ink-700);
+      letter-spacing: 0.05em;
+    }
+
+    .sec-circle-sub {
+      font-size: 0.67rem; color: var(--ink-300);
+      text-align: center; line-height: 1.3;
+    }
+
+    /* ─── UTILITY ─── */
+    .mono { font-family: var(--font-mono); }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .page-section { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="20" width="44" height="34" rx="4" fill="none" stroke="currentColor" stroke-width="2.5"/>
+        <path d="M20 20V16a10 10 0 0120 0v4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="30" cy="36" r="4" fill="currentColor"/>
+        <line x1="30" y1="40" x2="30" y2="46" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      <div class="logo-text">
+        <span class="logo-main">SecureVault</span>
+        <span class="logo-sub">Encrypted Storage</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-label">Main</div>
+        <button class="nav-item active" onclick="showPage('dashboard')">
+          <span class="icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+              <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+            </svg>
+          </span> Dashboard
+        </button>
+        <button class="nav-item" onclick="showPage('documents')">
+          <span class="icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/>
+            </svg>
+          </span> Documents
+        </button>
+        <button class="nav-item" onclick="showPage('upload')">
+          <span class="icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </span> Upload
+        </button>
+        <button class="nav-item" onclick="showPage('verify')">
+          <span class="icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <polyline points="9 12 11 14 15 10"/>
+            </svg>
+          </span> Verify Integrity
+        </button>
+      </div>
+
+      <div class="nav-divider"></div>
+
+      <div class="nav-section" id="admin-nav" style="display:none">
+        <div class="nav-label">Administration</div>
+        <button class="nav-item" onclick="showPage('users')">
+          <span class="icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </span> Users &amp; Roles
+        </button>
+        <button class="nav-item" onclick="showPage('audit')">
+          <span class="icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/><line x1="9" y1="9" x2="11" y2="9"/>
+            </svg>
+          </span> Audit Logs
+        </button>
+        <div class="nav-divider"></div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-label">Account</div>
+        <button class="nav-item" onclick="showPage('security')">
+          <span class="icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07M8.46 8.46a5 5 0 0 0 0 7.07"/>
+            </svg>
+          </span> Security Settings
+        </button>
+      </div>
+    </nav>
+
+    <div class="sidebar-user">
+      <div class="sidebar-user-info">
+        <div class="avatar" id="sidebar-avatar">?</div>
+        <div>
+          <div class="sidebar-username" id="sidebar-username">Loading…</div>
+          <div class="sidebar-role" id="sidebar-role">—</div>
+        </div>
+      </div>
+      <button class="btn-ghost-logout" onclick="logout()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN CONTENT ═══ -->
+  <main class="main-content">
+
+    <!-- ── Dashboard ── -->
+    <section id="page-dashboard" class="page-section active">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Dashboard</h1>
+          <p class="page-subtitle">Overview of your secure document vault</p>
+        </div>
+        <button class="btn-primary" style="width:auto;padding:11px 22px" onclick="showPage('upload')">
+          ⬆️ Upload Document
+        </button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Documents</div>
+          <div class="stat-value accent" id="stat-docs">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Encrypted</div>
+          <div class="stat-value green" id="stat-enc">—</div>
+        </div>
+        <div class="stat-card" id="stat-card-users" style="display:none">
+          <div class="stat-label">Total Users</div>
+          <div class="stat-value purple" id="stat-users">—</div>
+        </div>
+        <div class="stat-card" id="stat-card-recent" style="display:none">
+          <div class="stat-label">Uploads (7 days)</div>
+          <div class="stat-value yellow" id="stat-recent">—</div>
+        </div>
+      </div>
+
+      <div class="card fade-in" style="margin-bottom:20px">
+        <div class="section-label">Security Status</div>
+        <div id="security-status-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;text-align:center">
+
+          <!-- AES Encryption -->
+          <div class="sec-circle-item">
+            <div class="sec-circle">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </div>
+            <div class="sec-circle-label">AES-256-GCM</div>
+            <div class="sec-circle-sub">Encryption Active</div>
+          </div>
+
+          <!-- RSA Signatures -->
+          <div class="sec-circle-item">
+            <div class="sec-circle">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <polyline points="9 12 11 14 15 10"/>
+              </svg>
+            </div>
+            <div class="sec-circle-label">RSA-2048</div>
+            <div class="sec-circle-sub">Signatures Enabled</div>
+          </div>
+
+          <!-- TLS Transport -->
+          <div class="sec-circle-item">
+            <div class="sec-circle">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="2" y1="12" x2="22" y2="12"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+            </div>
+            <div class="sec-circle-label">HTTPS / TLS</div>
+            <div class="sec-circle-sub">Transport Secure</div>
+          </div>
+
+          <!-- 2FA -->
+          <div class="sec-circle-item">
+            <div class="sec-circle" id="2fa-status-card">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="5" y="2" width="14" height="20" rx="2"/>
+                <line x1="12" y1="18" x2="12.01" y2="18"/>
+                <path d="M9 7h6M9 11h4"/>
+              </svg>
+            </div>
+            <div class="sec-circle-label">2FA</div>
+            <div class="sec-circle-sub">Status: loading…</div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="card fade-in">
+        <div class="section-label">📁 Recent Documents</div>
+        <div id="recent-docs-list"></div>
+      </div>
+    </section>
+
+    <!-- ── Documents ── -->
+    <section id="page-documents" class="page-section">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Documents</h1>
+          <p class="page-subtitle">All encrypted documents in your vault</p>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn-secondary" onclick="loadDocuments()">🔄 Refresh</button>
+          <button class="btn-primary" style="width:auto;padding:11px 22px" onclick="showPage('upload')">⬆️ Upload</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div id="docs-loading" class="empty-state"><div class="spinner" style="margin:0 auto"></div></div>
+        <div id="docs-table" style="display:none">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>File</th><th>Size</th><th>Type</th>
+                  <th>Hash (SHA-256)</th><th>Uploaded</th>
+                  <th>Owner</th><th style="text-align:right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="docs-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div id="docs-empty" class="empty-state" style="display:none">
+          <div class="empty-icon">📭</div>
+          <h3>No documents yet</h3>
+          <p>Upload your first encrypted document</p>
+          <br/>
+          <button class="btn-primary" style="width:auto;margin:0 auto" onclick="showPage('upload')">⬆️ Upload Now</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Upload ── -->
+    <section id="page-upload" class="page-section">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Upload Document</h1>
+          <p class="page-subtitle">Documents are encrypted with AES-256-GCM and signed with RSA-2048</p>
+        </div>
+      </div>
+
+      <div class="card fade-in" style="max-width:600px">
+        <div class="upload-zone" id="upload-zone" onclick="triggerUpload()">
+          <input type="file" id="file-input" accept=".pdf,.docx,.doc,.txt,.png,.jpg,.jpeg,.xlsx,.pptx,.csv" onchange="handleFileSelected(this.files[0])"/>
+          <div class="upload-icon">📂</div>
+          <h3>Drop file here or click to browse</h3>
+          <p style="margin-top:8px">PDF, DOCX, TXT, PNG, JPG, XLSX, PPTX, CSV — max 16 MB</p>
+        </div>
+
+        <div id="file-preview" style="display:none;margin-top:20px">
+          <div class="card" style="background:var(--cream-50);border-color:var(--gold-400)">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div class="file-icon" id="preview-icon">📄</div>
+              <div style="flex:1">
+                <div style="font-weight:600;color:var(--ink-900)" id="preview-name">—</div>
+                <div class="mono" style="font-size:0.75rem;color:var(--ink-300)" id="preview-size">—</div>
+              </div>
+              <button class="btn-icon" onclick="clearFile()">✕</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="security-info" style="margin-top:16px">
+          🔒 Your file will be encrypted with AES-256-GCM before storage.
+          A SHA-256 hash will be computed and digitally signed with your RSA-2048 key.
+          The original file never touches the disk unencrypted.
+        </div>
+
+        <div id="upload-error" class="error-msg" style="margin-top:12px"></div>
+        <div id="upload-success" class="success-msg" style="margin-top:12px"></div>
+
+        <button class="btn-primary" style="margin-top:16px" id="upload-btn" onclick="uploadFile()" disabled>
+          <span>🔒 Encrypt &amp; Upload</span>
+        </button>
+
+        <div id="upload-result" style="display:none;margin-top:16px"></div>
+      </div>
+    </section>
+
+    <!-- ── Verify ── -->
+    <section id="page-verify" class="page-section">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Verify Integrity</h1>
+          <p class="page-subtitle">Check SHA-256 hash and RSA signature for any document</p>
+        </div>
+      </div>
+
+      <div class="card fade-in" style="max-width:640px">
+        <div class="form-group">
+          <label>Select Document</label>
+          <select id="verify-doc-select">
+            <option value="">— Select a document —</option>
+          </select>
+        </div>
+
+        <div class="security-info" style="margin-bottom:16px">
+          By default, verification checks the encrypted copy in the vault. Optionally, paste or load <strong>modified</strong> content below to compare its SHA-256 to the recorded hash — if you changed even one byte, the comparison should <strong>fail</strong> while the vault line can still pass.
+        </div>
+
+        <div class="form-group">
+          <label>Optional: paste text to compare (e.g. edit a line from a .txt upload)</label>
+          <textarea id="verify-candidate-text" rows="5" placeholder="Leave empty to only verify the vault copy…"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Optional: compare a file's exact bytes (any type)</label>
+          <input type="file" id="verify-candidate-file"/>
+        </div>
+
+        <button class="btn-primary" onclick="verifyDocument()">
+          🔍 Verify Integrity
+        </button>
+
+        <div id="verify-result" class="verify-result"></div>
+      </div>
+    </section>
+
+    <!-- ── Users (admin) ── -->
+    <section id="page-users" class="page-section">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Users &amp; Roles</h1>
+          <p class="page-subtitle">Manage user accounts and RBAC permissions</p>
+        </div>
+        <button class="btn-secondary" onclick="loadUsers()">🔄 Refresh</button>
+      </div>
+      <div class="card">
+        <div id="users-loading" class="empty-state"><div class="spinner" style="margin:0 auto"></div></div>
+        <div id="users-table" style="display:none">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>User</th><th>Email</th><th>Role</th>
+                  <th>2FA</th><th>OAuth</th><th>Status</th>
+                  <th>Joined</th><th style="text-align:right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="users-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Audit Logs ── -->
+    <section id="page-audit" class="page-section">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Audit Logs</h1>
+          <p class="page-subtitle">Complete activity trail for all users</p>
+        </div>
+        <button class="btn-secondary" onclick="loadAuditLogs()">🔄 Refresh</button>
+      </div>
+      <div class="card">
+        <div id="audit-loading" class="empty-state"><div class="spinner" style="margin:0 auto"></div></div>
+        <div id="audit-table" style="display:none">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th><th>User</th><th>Action</th><th>Target</th><th>IP</th>
+                </tr>
+              </thead>
+              <tbody id="audit-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Security Settings ── -->
+    <section id="page-security" class="page-section">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Security Settings</h1>
+          <p class="page-subtitle">Manage 2FA and password settings</p>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:900px">
+
+        <!-- Change Password -->
+        <div class="card fade-in">
+          <div class="section-label">🔑 Change Password</div>
+          <div class="form-group">
+            <label>Current Password</label>
+            <div class="input-eye">
+              <input type="password" id="old-pw" placeholder="Current password"/>
+              <button type="button" class="eye-btn" onclick="togglePw('old-pw',this)">👁</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>New Password</label>
+            <div class="input-eye">
+              <input type="password" id="new-pw" placeholder="Min 8 chars, mixed" oninput="checkPwStrength(this.value)"/>
+              <button type="button" class="eye-btn" onclick="togglePw('new-pw',this)">👁</button>
+            </div>
+            <div class="pw-strength-bar"><div id="pw-strength-fill"></div></div>
+            <p class="pw-hint" id="pw-hint"></p>
+          </div>
+          <div class="form-group">
+            <label>Confirm New Password</label>
+            <div class="input-eye">
+              <input type="password" id="new-pw2" placeholder="Repeat new password"/>
+              <button type="button" class="eye-btn" onclick="togglePw('new-pw2',this)">👁</button>
+            </div>
+          </div>
+          <div id="pw-error" class="error-msg"></div>
+          <button class="btn-primary" onclick="changePassword()">Update Password</button>
+        </div>
+
+        <!-- 2FA -->
+        <div class="card fade-in" id="totp-card">
+          <div class="section-label">🛡️ Two-Factor Authentication</div>
+          <p style="margin-bottom:16px;font-size:0.82rem;color:var(--ink-400)">2FA is mandatory for all accounts and provides enhanced security protection.</p>
+          <div id="totp-enabled-ui">
+            <div class="badge badge-green" style="margin-bottom:16px">✓ 2FA is mandatory and enabled</div>
+            <p style="font-size:0.82rem;margin-bottom:16px;color:var(--ink-400)">Your account is protected with two-factor authentication. This cannot be disabled.</p>
+            <button class="btn-secondary" onclick="setup2fa()" style="margin-bottom:8px;width:100%">Regenerate 2FA Secret →</button>
+            <p style="font-size:0.72rem;color:var(--ink-200);margin-top:8px">Use this button only if you need to generate a new authenticator secret.</p>
+          </div>
+
+          <div id="totp-setup-ui" style="display:none">
+            <p style="font-size:0.82rem;margin-bottom:8px;color:var(--ink-400)">1. Open your authenticator app<br/>2. Add account manually or scan QR<br/>3. Enter the secret key below:</p>
+            <div class="totp-secret-box" id="totp-secret-display" onclick="copyToClipboard(this.textContent)" title="Click to copy">Loading…</div>
+            <p style="font-size:0.75rem;color:var(--ink-300);margin-bottom:12px">Or use this URI in your authenticator:<br/>
+              <span id="totp-uri-display" class="mono" style="font-size:0.68rem;word-break:break-all;color:var(--gold-600)"></span>
+            </p>
+            <div class="form-group">
+              <label>Enter 6-digit code to confirm</label>
+              <input type="text" id="totp-confirm-code" placeholder="123456" maxlength="6" pattern="[0-9]{6}"/>
+            </div>
+            <div id="totp-error" class="error-msg"></div>
+            <div style="display:flex;gap:10px">
+              <button class="btn-secondary" onclick="cancelSetup2fa()">Cancel</button>
+              <button class="btn-primary" onclick="confirmEnable2fa()">Confirm &amp; Regenerate</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Role Change Modal -->
+<div class="modal-overlay" id="role-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Change User Role</h3>
+      <button class="modal-close" onclick="closeModal('role-modal')">✕</button>
+    </div>
+    <p style="margin-bottom:16px;color:var(--ink-400);font-size:0.82rem">
+      Select a new role for <strong id="role-modal-user" style="color:var(--ink-900)"></strong>:
+    </p>
+    <input type="hidden" id="role-modal-uid"/>
+    <div style="display:grid;gap:10px">
+      <button class="btn-secondary" onclick="setRole('admin')" style="justify-content:flex-start;padding:14px 16px;gap:14px">
+        <span style="font-size:1.15rem">👑</span>
+        <div style="text-align:left">
+          <div style="font-weight:600;color:var(--ink-900)">Admin</div>
+          <div style="font-size:0.75rem;color:var(--ink-300)">Full system access, user management</div>
+        </div>
+      </button>
+      <button class="btn-secondary" onclick="setRole('manager')" style="justify-content:flex-start;padding:14px 16px;gap:14px">
+        <span style="font-size:1.15rem">🗂️</span>
+        <div style="text-align:left">
+          <div style="font-weight:600;color:var(--ink-900)">Manager</div>
+          <div style="font-size:0.75rem;color:var(--ink-300)">Can view and verify all documents</div>
+        </div>
+      </button>
+      <button class="btn-secondary" onclick="setRole('user')" style="justify-content:flex-start;padding:14px 16px;gap:14px">
+        <span style="font-size:1.15rem">👤</span>
+        <div style="text-align:left">
+          <div style="font-weight:600;color:var(--ink-900)">User</div>
+          <div style="font-size:0.75rem;color:var(--ink-300)">Own documents only</div>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<script src="../js/api.js"></script>
+<script src="../js/dashboard.js"></script>
+</body>
+</html>
