@@ -1,5 +1,3 @@
-# 🔒 Secure Document Vault
-
 A complete secure web-based document management system implementing modern cryptographic security principles.
 
 ## Security Features
@@ -91,7 +89,7 @@ python backend/server.py
 https://localhost:5443
 ```
 
-> ⚠️ Your browser will show a security warning because the certificate is self-signed.  
+>  Your browser will show a security warning because the certificate is self-signed.  
 > Click "Advanced" → "Proceed to localhost" to continue.
 
 ## Default Admin Account
@@ -201,31 +199,5 @@ To demonstrate the importance of HTTPS:
 5. Filter: `tls` — traffic is encrypted, credentials not visible
 6. Screenshot both captures for your report
 
-## Roles & Permissions
 
-| Action | User | Manager | Admin |
-|---|---|---|---|
-| Upload documents | ✅ | ✅ | ✅ |
-| View own documents | ✅ | ✅ | ✅ |
-| View all documents | ❌ | ✅ | ✅ |
-| Download own docs | ✅ | ✅ | ✅ |
-| Download all docs | ❌ | ✅ | ✅ |
-| Verify documents | ✅ | ✅ | ✅ |
-| Delete own docs | ✅ | ❌ | ✅ |
-| Delete any docs | ❌ | ❌ | ✅ |
-| View users | ❌ | ✅ | ✅ |
-| Change user roles | ❌ | ❌ | ✅ |
-| View audit logs | ❌ | ❌ | ✅ |
 
-## Security Notes
-
-- All documents are encrypted with AES-256-GCM before disk storage
-- Encryption keys are stored in the database, never alongside ciphertext
-- Each user gets an RSA-2048 key pair generated on registration
-- Every upload generates a SHA-256 hash + RSA digital signature
-- HTTPS enforced via TLS 1.2/1.3 with OpenSSL
-- PBKDF2-SHA256 with 600,000 iterations for password hashing
-- TOTP implemented per RFC 6238 (30-second window, SHA-1 HMAC)
-- All actions logged in audit trail with IP and timestamp
-- JWT tokens expire after 8 hours
-- Security headers: HSTS, X-Frame-Options, X-XSS-Protection, nosniff
