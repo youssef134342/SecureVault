@@ -1,20 +1,5 @@
 A complete secure web-based document management system implementing modern cryptographic security principles.
 
-## Security Features
-
-| Feature | Implementation |
-|---|---|
-| Password Hashing | PBKDF2-SHA256 (600,000 iterations) via Werkzeug |
-| JWT Authentication | HS256 tokens (8h access / 7d refresh) |
-| OAuth Login | GitHub & Google OAuth 2.0 |
-| Two-Factor Auth (2FA) | TOTP RFC 6238 (Google Authenticator compatible) |
-| Document Encryption | AES-256-GCM (authenticated encryption) |
-| Digital Signatures | RSA-2048 + SHA-256 (PKCS#1 v1.5) |
-| Integrity Verification | SHA-256 hash comparison |
-| RBAC | Admin / Manager / User roles |
-| HTTPS | TLS via self-signed certificate (OpenSSL) |
-| Password Policy | Min 8 chars, upper, lower, digit, special |
-
 ## Prerequisites
 
 - Python 3.10+
