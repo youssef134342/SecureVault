@@ -146,58 +146,6 @@ secure-vault/
 └── uploads/                   # Encrypted document storage (auto-created)
 ```
 
-## API Endpoints
-
-### Auth
-| Method | Path | Description |
-|---|---|---|
-| POST | /api/auth/register | Register new user |
-| POST | /api/auth/login | Login (returns JWT) |
-| POST | /api/auth/logout | Logout |
-| GET | /api/auth/me | Get current user profile |
-| POST | /api/auth/change-password | Change password |
-| POST | /api/auth/2fa/setup | Generate TOTP secret |
-| POST | /api/auth/2fa/enable | Enable 2FA with code |
-| POST | /api/auth/2fa/disable | Disable 2FA |
-
-### Documents
-| Method | Path | Description |
-|---|---|---|
-| GET | /api/documents/ | List documents |
-| POST | /api/documents/upload | Upload & encrypt document |
-| GET | /api/documents/{uuid} | Get document metadata |
-| GET | /api/documents/{uuid}/download | Decrypt & download |
-| GET | /api/documents/{uuid}/verify | Verify integrity & signature |
-| DELETE | /api/documents/{uuid} | Delete document |
-
-### Admin
-| Method | Path | Description |
-|---|---|---|
-| GET | /api/admin/users | List all users |
-| PUT | /api/admin/users/{id}/role | Change user role |
-| PUT | /api/admin/users/{id}/status | Activate/deactivate user |
-| GET | /api/admin/audit-logs | View audit trail |
-| GET | /api/admin/stats | System statistics |
-
-### OAuth
-| Method | Path | Description |
-|---|---|---|
-| GET | /api/oauth/github | GitHub OAuth redirect |
-| GET | /api/oauth/github/callback | GitHub callback |
-| GET | /api/oauth/google | Google OAuth redirect |
-| GET | /api/oauth/google/callback | Google callback |
-| GET | /api/oauth/providers | Check configured providers |
-
-## MITM / Wireshark Demo
-
-To demonstrate the importance of HTTPS:
-
-1. **HTTP (insecure):** Temporarily run with `app.run(port=5080, debug=False)` (no SSL)
-2. Open Wireshark → capture on `lo` or `Loopback`
-3. Filter: `http` — login and observe credentials in plaintext
-4. **HTTPS (secure):** Switch back to SSL context
-5. Filter: `tls` — traffic is encrypted, credentials not visible
-6. Screenshot both captures for your report
 
 
 
